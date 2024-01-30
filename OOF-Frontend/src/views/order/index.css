@@ -1,0 +1,83 @@
+.order-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgb(246, 246, 246);
+}
+
+.order-body {
+  width: 70%;
+  margin-top: 1rem;
+}
+
+.order-image {
+  width: 10rem;
+  height: 15rem;
+  margin-left: 0.2rem;
+}
+
+.order-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+}
+
+.order-card-body {
+  border-bottom: 1px solid gray;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.order-detail {
+  flex-grow: 1;
+  margin-left: 2rem;
+}
+
+.order-detail div {
+  margin-top: 1rem;
+}
+
+.order-category-name {
+  font-size: 0.8rem;
+  color: rgb(121, 121, 121);
+}
+
+.order-supplier-name {
+  font-size: 0.8rem;
+  color: rgb(121, 121, 121);
+}
+
+.order-quantity {
+  font-size: 0.8rem;
+  color: rgb(75, 75, 75);
+}
+
+.order-status {
+  width: 100%;
+  height: 2rem;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  border-bottom: 1px solid gray;
+}
+
+.unit-price {
+  display: flex;
+  align-items: center;
+  color: red;
+  margin-right: 1rem;
+}
+
+.total-price {
+  display: flex;
+  justify-content: end;
+  margin-top: 0.2rem;
+  margin-right: 2rem;
+  margin-bottom: 0.5rem;
+}

@@ -1,0 +1,38 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: system-ui;
+}
+
+.app-content {
+  flex-grow: 1;
+}
+
+.footer-container {
+  margin-top: 2rem;
+  display: flex;
+  width: 90%;
+  padding-left: 5%;
+  padding-right: 5%;
+  flex-direction: row;
+  background-color: rgb(34,34,34);
+}
+
+.footer-info {
+  flex-grow: 1;
+  width: 25%; 
+  padding: 0.5rem;
+  color: white;
+}
+
+a {
+  text-decoration: none;
+  color: rgb(255, 164, 131);
+}
+
+.layout {
+  height: 100%;
+  width: 100%;
+}
