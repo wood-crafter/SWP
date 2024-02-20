@@ -29,6 +29,37 @@ public class ProductCustomRepository {
             " inner join suppliers s" +
             " on p.supplier_id = s.id";
 
+    private final String SQL_HOT_QUERY = "SELECT " +
+            "    p.id AS id," +
+            "    p.name AS productName," +
+            "    p.price AS price," +
+            "    p.path AS imagePath," +
+            "    CASE" +
+            "        WHEN p.status = 1 THEN 'Active'" +
+            "        ELSE 'Inactive'" +
+            "    END AS status," +
+            "    p.description AS description," +
+            "    c.name AS categoryName," +
+            "    s.name AS supplierName" +
+            " FROM" +
+            "    (SELECT " +
+            "        product_stocktaking_id, SUM(quantity) AS total_quantity" +
+            "    FROM" +
+            "        order_product" +
+            "    WHERE" +
+            "        TIMESTAMPDIFF(DAY, created_date, NOW()) <= 30" +
+            "    GROUP BY product_stocktaking_id" +
+            "    ORDER BY total_quantity DESC" +
+            "    LIMIT 10) t1" +
+            "        INNER JOIN" +
+            "    product_stocktaking ps ON ps.id = t1.product_stocktaking_id" +
+            "        INNER JOIN" +
+            "    products p ON p.id = ps.product_id" +
+            "        INNER JOIN" +
+            "    categories c ON p.category_id = c.id" +
+            "        INNER JOIN" +
+            "    suppliers s ON p.supplier_id = s.id";
+
     public List<ProductDto> findAll(Integer categoryId, Integer supplierId, String searchText, Float minPrice, Float maxPrice) {
         String conditionQuery = createCondition(categoryId, supplierId, searchText, minPrice, maxPrice);
         Query query = entityManager.createNativeQuery(SQL_QUERY + conditionQuery, "ProductDto");
@@ -75,4 +106,8 @@ public class ProductCustomRepository {
                 : conditionQuery;
     }
 
+    public List<ProductDto> getHots() {
+        Query query = entityManager.createNativeQuery(SQL_HOT_QUERY, "ProductDto");
+        return query.getResultList();
+    }
 }

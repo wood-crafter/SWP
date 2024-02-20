@@ -52,6 +52,16 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/hot")
+    public ResponseEntity<BaseResponse<List<ProductDto>>> getHots() {
+        try {
+            return ResponseEntity.ok(BaseResponse.ok(productService.getHots()));
+        } catch (Exception e) {
+            log.error("Get product: " + e);
+            return ResponseEntity.badRequest().body(BaseResponse.fail(e.getMessage()));
+        }
+    }
+
     @GetMapping("/{productId}")
     public ResponseEntity<BaseResponse<Product>> productDetail(@PathVariable Float productId) {
         try {

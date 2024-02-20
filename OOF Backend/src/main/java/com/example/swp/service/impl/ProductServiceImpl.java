@@ -55,4 +55,9 @@ public class ProductServiceImpl implements ProductService {
         rate.setCommentator(user.getFullname());
         commentRepo.save(rate);
     }
+
+    @Override
+    public List<ProductDto> getHots() {
+        return productCustomRepo.getHots();
+    }
 }

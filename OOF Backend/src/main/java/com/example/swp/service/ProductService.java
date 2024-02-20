@@ -13,4 +13,6 @@ public interface ProductService {
     Product findById(Float productId);
 
     void comment(User user, Comment rate);
+
+    List<ProductDto> getHots();
 }
