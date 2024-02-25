@@ -23,7 +23,7 @@ import lombok.Data;
 public class OrderProduct extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "product_size_id")
+    @JoinColumn(name = "product_stocktaking_id")
     private ProductStocktaking productStocktaking;
 
     @Column(name = "unit_price")

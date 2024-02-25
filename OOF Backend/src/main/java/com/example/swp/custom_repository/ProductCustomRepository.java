@@ -59,6 +59,31 @@ public class ProductCustomRepository {
             "    categories c ON p.category_id = c.id" +
             "        INNER JOIN" +
             "    suppliers s ON p.supplier_id = s.id";
+    
+    private final String SQL_NEW_QUERY = "SELECT " +
+            "    p.id AS id," +
+            "    p.name AS productName," +
+            "    p.price AS price," +
+            "    p.path AS imagePath," +
+            "    CASE" +
+            "        WHEN p.status = 1 THEN 'Active'" +
+            "        ELSE 'Inactive'" +
+            "    END AS status," +
+            "    p.description AS description," +
+            "    c.name AS categoryName," +
+            "    s.name AS supplierName" +
+            " FROM" +
+            "    products p" +
+            "        INNER JOIN" +
+            "    categories c ON p.category_id = c.id" +
+            "        INNER JOIN" +
+            "    suppliers s ON p.supplier_id = s.id" +
+            " WHERE" +
+            "    c.name = :categoryName" +
+            " ORDER BY id DESC" +
+            " LIMIT :pageCount OFFSET :offset";
+
+    private final Integer PAGE_COUNT = 10;
 
     public List<ProductDto> findAll(Integer categoryId, Integer supplierId, String searchText, Float minPrice, Float maxPrice) {
         String conditionQuery = createCondition(categoryId, supplierId, searchText, minPrice, maxPrice);
@@ -108,6 +133,14 @@ public class ProductCustomRepository {
 
     public List<ProductDto> getHots() {
         Query query = entityManager.createNativeQuery(SQL_HOT_QUERY, "ProductDto");
+        return query.getResultList();
+    }
+
+    public List<ProductDto> getNew(Integer page, String categoryName) {
+        Query query = entityManager.createNativeQuery(SQL_NEW_QUERY, "ProductDto");
+        query.setParameter("categoryName", categoryName);
+        query.setParameter("pageCount", PAGE_COUNT);
+        query.setParameter("offset", PAGE_COUNT * (page - 1));
         return query.getResultList();
     }
 }
