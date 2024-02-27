@@ -41,29 +41,25 @@ export const Home = (props) => {
         }
       })
       setProducts(nextProducts)
-      const currentHotProducts = JSON.parse(JSON.stringify(nextProducts))
-      currentHotProducts.sort((a, b) => b.price - a.price)
-      if (currentHotProducts.length > 10) {
-        currentHotProducts.length = 10
-      }
-      setHotProducts(currentHotProducts)
       setCategoryImage(nextCategoriesImage)
       setCategories(nextCategories)
       setCurrentCategory(nextCategories[0])
     })
   }, [])
   useEffect(() => {
-    if (!currentCategory) return
-    if (!products.length) return
-    const productByCategory = []
-    JSON.parse(JSON.stringify(products)).forEach(item => {
-      if (item.categoryName === currentCategory) productByCategory.push(item)
+    getRequest('products/hot').then(data => {
+      const hots = data.data.body
+      setHotProducts(hots)
     })
-    productByCategory.sort((a, b) => b.id - a.id)
-    if (productByCategory.length > 10) {
-      productByCategory.length = 10
-    }
-    setNewProducts(productByCategory)
+  }, [])
+  useEffect(() => {
+    if (!currentCategory) return
+    if (!products.length) returns
+    // TODO: Get more when hit limit
+    // TODO: Add to cart
+    getRequest('products/new/1', {categoryName: currentCategory}).then(data => {
+      setNewProducts(data.data.body)
+    })
   }, [currentCategory])
 
   return (

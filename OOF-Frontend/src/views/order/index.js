@@ -19,7 +19,7 @@ export const Order = (props) => {
       const currentUrders = data.data.body
       setOrders(currentUrders)
     }).catch(e => {
-      navigate(`/product`)
+      // navigate(`/product`)
     })
   }
   
