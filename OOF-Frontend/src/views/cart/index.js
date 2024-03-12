@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { getRequest, postRequest } from '../../providers/request'
 import './index.css'
-import { useLocation } from "react-router-dom"
 import { BASE_URL } from '../../constant'
 import { Checkbox } from 'antd'
 import { useNavigate } from 'react-router'
@@ -69,7 +68,7 @@ export const Cart = (props) => {
       const carts = data.data.body
       setCart(carts)
     }).catch(e => {
-      navigate(`/product`)
+      // navigate(`/product`)
     })
   }
 
@@ -93,11 +92,11 @@ export const Cart = (props) => {
           {cart.map(item => {
             return (
               <tr key={item.id}>
-                <td><img style={{width: 'auto', height: '15rem'}} src={`${BASE_URL}${item.productSize.product.path}`}/></td>
-                <td>{item.productSize.product.name}</td>
-                <td>{USDollar.format(item.productSize.product.price)}</td>
+                <td><img style={{width: 'auto', height: '15rem'}} src={`${BASE_URL}${item.productStocktaking.product.path}`}/></td>
+                <td>{item.productStocktaking.product.name}</td>
+                <td>{USDollar.format(item.productStocktaking.product.price)}</td>
                 <td>{item.quantity}</td>
-                <td>{USDollar.format(item.quantity * item.productSize.product.price)}</td>
+                <td>{USDollar.format(item.quantity * item.productStocktaking.product.price)}</td>
                 <td>
                   <Checkbox onChange={(e) => {onCheckboxChange(e, item.id)}} />
                 </td>

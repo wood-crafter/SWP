@@ -15,4 +15,6 @@ public interface ProductService {
     void comment(User user, Comment rate);
 
     List<ProductDto> getHots();
+
+    List<ProductDto> getNew(Integer page, String categoryId);
 }

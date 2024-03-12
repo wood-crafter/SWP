@@ -57,7 +57,18 @@ public class ProductController {
         try {
             return ResponseEntity.ok(BaseResponse.ok(productService.getHots()));
         } catch (Exception e) {
-            log.error("Get product: " + e);
+            log.error("Get Hot product: " + e);
+            return ResponseEntity.badRequest().body(BaseResponse.fail(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/new/{page}")
+    public ResponseEntity<BaseResponse<List<ProductDto>>> getNew(@PathVariable Integer page,
+                                                                 @RequestParam String categoryName) {
+        try {
+            return ResponseEntity.ok(BaseResponse.ok(productService.getNew(page, categoryName)));
+        } catch (Exception e) {
+            log.error("Get New product: " + e);
             return ResponseEntity.badRequest().body(BaseResponse.fail(e.getMessage()));
         }
     }

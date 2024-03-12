@@ -60,4 +60,9 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getHots() {
         return productCustomRepo.getHots();
     }
+
+    @Override
+    public List<ProductDto> getNew(Integer page, String categoryName) {
+        return productCustomRepo.getNew(page, categoryName);
+    }
 }
