@@ -39,7 +39,7 @@ export const Footer = () => {
           <span class="list_footer">
             <b>Hợp tác kinh doanh: </b>
             <a href="/">
-              0947342259 (Mr. Dương)
+              0366513328 (Mr. Hung)
             </a>
           </span>
         </div>
@@ -55,7 +55,7 @@ export const Footer = () => {
           <span class="list_footer">
             <b>Nhượng quyền thương hiệu: </b>
             <a href="/">
-              0334.741.141 (Mr. Dương)
+              0334.741.141 (Mr. Hung)
             </a>
           </span>
         </div>
@@ -63,7 +63,7 @@ export const Footer = () => {
           <span class="list_footer">
             <b>Than phiền dịch vụ: </b>
             <a href="/">
-              0334.741.141 (Mr. Dương)
+              0334.741.141 (Mr. Hung)
             </a>
           </span>
         </div>
