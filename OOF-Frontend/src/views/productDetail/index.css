@@ -116,3 +116,7 @@
 .star:hover {
   cursor: pointer;
 }
+
+.color:hover {
+  cursor: pointer;
+}

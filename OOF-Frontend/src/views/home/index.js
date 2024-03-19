@@ -55,8 +55,6 @@ export const Home = (props) => {
   useEffect(() => {
     if (!currentCategory) return
     if (!products.length) returns
-    // TODO: Get more when hit limit
-    // TODO: Add to cart
     getRequest('products/new/1', {categoryName: currentCategory}).then(data => {
       setNewProducts(data.data.body)
     })

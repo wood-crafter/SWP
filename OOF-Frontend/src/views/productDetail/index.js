@@ -14,15 +14,19 @@ export const ProductDetail = (props) => {
     currency: 'VND',
   })
   const user = useContext(AuthContext).user
+  const [commentPlaceHolder, setCommentPlaceHolder] = useState('Để lại bình luận')
   const location = useLocation()
   const navigate = useNavigate()
   const id = location?.state?.id
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState(null)
+  const [canUserComment, setCanUserComment] = useState(false)
+  const [currentColor, setCurrentColor] = useState(null)
   const [productSizes, setProductSizes] = useState(null)
+  const [productColors, setProductColors] = useState(null)
   const [currentSize, setCurrentSize] = useState(null)
+  const [maxQuantity, setMaxQuantity] = useState(0)
   const [numOfProduct, setNumOfProduct] = useState(1)
   const [currentStockQuantity, setCurrentStockQuantity] = useState(0)
-  const [productSize, setProductSize] = useState(null)
   const [api, contextHolder] = notification.useNotification()
   const [rate, setRate] = useState(-1)
   const [comment, setComment] = useState('')
@@ -55,12 +59,6 @@ export const ProductDetail = (props) => {
     return '⭐'.repeat(num);
   }
 
-  function handleSizeClick (name, stockQuantity, id) {
-    setCurrentSize(name)
-    setProductSize(id)
-    setCurrentStockQuantity(stockQuantity)
-  }
-
   function handleAddToCard() {
     if (!currentSize && productSizes && productSizes[0].size != null ) {
       openNotification('topRight', 'Pick a size', `Please choose a size first`)
@@ -70,7 +68,11 @@ export const ProductDetail = (props) => {
       openNotification('topRight', 'Out of stock', `Size ${currentSize} only have ${currentStockQuantity} products left`)
       return
     }
-    postRequest(`cart/add`, {productSize: {id: productSize}, quantity: numOfProduct}, user).then(data => {
+    // TODO: REMOVE comment -> Only user who order success can comment
+    // TODO: add color and size picker options
+    // TODO: Select productStockTaking by color and size
+    // TODO: VN pay AND Ship code -> QR code
+    postRequest(`cart/add`, {productStocktaking: product.productStocktaking[0], quantity: numOfProduct}, user).then(data => {
       const code = data.status
       if (code == 200) {
         openNotification('topRight', 'Added to card', `Added to card ${numOfProduct} products`)
@@ -78,13 +80,17 @@ export const ProductDetail = (props) => {
         openNotification('topRight', 'Order failed', `Code ${code}`)
       }
     }).catch(e => {
+      console.error(e)
       if (user) navigate(`/product`)
       else navigate(`/login`)
     })
   }
 
   function handleClickComment(id) {
-    if (!comment) return
+    if (!comment) {
+      window.alert('Vui lòng để lại bình luận')
+      return
+    }
     if (rate < 0) {
       window.alert('Vui lòng đánh giá sản phẩm')
       return
@@ -92,6 +98,7 @@ export const ProductDetail = (props) => {
     postRequest(`products/comment`, {product: {id}, comment: comment, star: rate}, user).then(data => {
       const code = data.status
       if (code == 200) loadProductDetai()
+      setCommentPlaceHolder('')
     }).catch(e => {
       if (e.response.status == 401) {
         window.alert('Vui lòng đăng nhập')
@@ -102,21 +109,65 @@ export const ProductDetail = (props) => {
     })
   }
 
+  function handleColorClick(e) {
+    setCurrentColor(e.target.value)
+    setProductSizes(setSizesByColor(product.productStocktaking, e.target.value))
+  }
+
+  function handleSizeClick(size, quantity) {
+    if (quantity < 1) {
+      setMaxQuantity(0)
+      return
+    }
+    setCurrentSize(size)
+    setMaxQuantity(quantity)
+  }
+
   function loadProductDetai() {
     if (!id) navigate(`/products`)
     getRequest(`products/${id}`).then(data => {
       const currentProduct = data.data.body
-      setProductSizes(currentProduct.productSizes)
-      if (currentProduct.productSizes[0].size) {
-        setCurrentSize(currentProduct.productSizes[0].size.name)
-      }
-      setProductSize(currentProduct.productSizes[0].id)
-      setCurrentStockQuantity(currentProduct.productSizes[0].stockQuantity)
-      setProduct(currentProduct)
+      // TODO: migrate sizes
+      // setProductSizes(currentProduct.productSizes)
+      // if (currentProduct.productSizes[0].size) {
+      //   setCurrentSize(currentProduct.productSizes[0].size.name)
+      // }
+      // setProductSize(currentProduct.productSizes[0].id)
+      // setCurrentStockQuantity(currentProduct.productSizes[0].stockQuantity)
+      setProduct({...currentProduct})
+      const nextProductColors = []
+      currentProduct?.productStocktaking.forEach(item => {
+        if (nextProductColors.findIndex(e => e === item.color) === -1) {
+          nextProductColors.push(item.color)
+        }
+      })
+      setProductColors(nextProductColors)
+      setCurrentColor(nextProductColors[0])
+      setProductSizes(setSizesByColor(currentProduct?.productStocktaking, nextProductColors[0]))
     }).catch(e => {
-      navigate(`/products`)
+      // navigate(`/products`)
     })
   }
+
+  function setSizesByColor(productStockTaking, color) {
+    const nextSize = []
+    productStockTaking.forEach(item => {
+      if (nextSize.findIndex(e => e === item.size) === -1 && item.color === color) {
+        nextSize.push({size: item.size, quantity: item.stockQuantity})
+      }
+    })
+
+    return nextSize
+  }
+
+  useEffect(() => {
+    getRequest(`products/is-ordered/${id}`, {}, user).then(data => {
+      const resultCanUserComment = data.data.body
+      setCanUserComment(resultCanUserComment)
+    }).catch(e => {
+      // navigate(`/products`)
+    })
+  }, [])
 
   useEffect(() => {
     loadProductDetai()
@@ -168,13 +219,19 @@ export const ProductDetail = (props) => {
             </div>
             <div className='cart-info'>
               <div className='size-info'>
+                {productColors && productColors.map(item => {
+                  if (!item) return
+                  return <button value={item} className='color' style={{backgroundColor: item, border: `${item === currentColor ? '1px solid coral' : '0'}`, marginRight: '0.3rem', color: 'gray'}} onClick={handleColorClick}>{item}</button>
+                })}
+              </div>
+              <div className='size-info'>
                 {productSizes && productSizes.map(item => {
-                  if (!item.size) return
-                  return <button value={item.size.name} className={`${currentSize == item.size.name ? 'size selected-size ' : 'size '}${item.stockQuantity == 0 ? 'out-of-stock' : ''}`} onClick={() => {if (item.stockQuantity) handleSizeClick(item.size.name, item.stockQuantity, item.id)}}>{item.size.name}</button>
+                  if (!item || !item.size) return
+                  return <button value={item.size} className={`size ${item.size === currentSize ? 'selected-size' : ''} ${item.quantity < 1 ? 'out-of-stock' : ''}`} onClick={() => {handleSizeClick(item.size, item.quantity)}}>{item.size}</button>
                 })}
               </div>
               <div className='order-info'>
-                <InputNumber min={1} max={9999} defaultValue={1} onChange={onNumberChange} />
+                <InputNumber min={0} max={maxQuantity} defaultValue={1} onChange={onNumberChange}/>
                 <button className='add-to-cart' onClick={handleAddToCard} >Add to card</button>
               </div>
             </div>
@@ -198,15 +255,19 @@ export const ProductDetail = (props) => {
                   </div>
                 </div>
               })}
-              <textarea onChange={handleMessageChange} placeholder='Để lại bình luận' style={{marginLeft: '7rem', width: 'calc(100% - 7rem)', marginTop: '1rem', minHeight: '7rem'}}></textarea>
-              <div style={{width: '100%', display: 'flex', justifyContent: 'end', marginBottom: '1rem'}}>
-                <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(1)}}>{rate < 1 ? '☆' : '⭐'}</button>
-                <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(2)}}>{rate < 2 ? '☆' : '⭐'}</button>
-                <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(3)}}>{rate < 3 ? '☆' : '⭐'}</button>
-                <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(4)}}>{rate < 4 ? '☆' : '⭐'}</button>
-                <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(5)}}>{rate < 5 ? '☆' : '⭐'}</button>
-              </div>
-              <div style={{width: '100%', display: 'flex', justifyContent: 'end'}}><button onClick={() => {handleClickComment(product.id)}} className='btn-commnet' style={{background: 'coral', border: '0', width: '6rem', height: '2rem'}}>Bình luận</button></div>
+              {
+              canUserComment && <>
+                <textarea onChange={handleMessageChange} placeholder={commentPlaceHolder} style={{marginLeft: '7rem', width: 'calc(100% - 7rem)', marginTop: '1rem', minHeight: '7rem'}}></textarea>
+                <div style={{width: '100%', display: 'flex', justifyContent: 'end', marginBottom: '1rem'}}>
+                  <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(1)}}>{rate < 1 ? '☆' : '⭐'}</button>
+                  <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(2)}}>{rate < 2 ? '☆' : '⭐'}</button>
+                  <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(3)}}>{rate < 3 ? '☆' : '⭐'}</button>
+                  <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(4)}}>{rate < 4 ? '☆' : '⭐'}</button>
+                  <button className='star' style={{backgroundColor: 'white', border: '0', fontSize: '1.3rem'}} onClick={() => {hanldeRate(5)}}>{rate < 5 ? '☆' : '⭐'}</button>
+                </div>
+                <div style={{width: '100%', display: 'flex', justifyContent: 'end'}}><button onClick={() => {handleClickComment(product.id)}} className='btn-commnet' style={{background: 'coral', border: '0', width: '6rem', height: '2rem'}}>Bình luận</button></div>
+              </>
+              }
             </div>
           </div>)
         }
