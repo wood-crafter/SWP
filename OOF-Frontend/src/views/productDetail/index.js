@@ -26,7 +26,6 @@ export const ProductDetail = (props) => {
   const [currentSize, setCurrentSize] = useState(null)
   const [maxQuantity, setMaxQuantity] = useState(0)
   const [numOfProduct, setNumOfProduct] = useState(1)
-  const [currentStockQuantity, setCurrentStockQuantity] = useState(0)
   const [api, contextHolder] = notification.useNotification()
   const [rate, setRate] = useState(-1)
   const [comment, setComment] = useState('')
@@ -64,13 +63,13 @@ export const ProductDetail = (props) => {
       openNotification('topRight', 'Pick a size', `Please choose a size first`)
       return
     }
-    if (numOfProduct > currentStockQuantity && productSizes && productSizes[0].size != null) {
+    const currentStockQuantity = product?.productStocktaking.find(it => it.color === currentColor && it.size === currentSize)
+
+    if (numOfProduct > currentStockQuantity) {
       openNotification('topRight', 'Out of stock', `Size ${currentSize} only have ${currentStockQuantity} products left`)
       return
     }
     // TODO: REMOVE comment -> Only user who order success can comment
-    // TODO: add color and size picker options
-    // TODO: Select productStockTaking by color and size
     // TODO: VN pay AND Ship code -> QR code
     postRequest(`cart/add`, {productStocktaking: product.productStocktaking[0], quantity: numOfProduct}, user).then(data => {
       const code = data.status
@@ -115,11 +114,10 @@ export const ProductDetail = (props) => {
   }
 
   function handleSizeClick(size, quantity) {
+    setCurrentSize(size)
     if (quantity < 1) {
       setMaxQuantity(0)
-      return
     }
-    setCurrentSize(size)
     setMaxQuantity(quantity)
   }
 
@@ -128,12 +126,6 @@ export const ProductDetail = (props) => {
     getRequest(`products/${id}`).then(data => {
       const currentProduct = data.data.body
       // TODO: migrate sizes
-      // setProductSizes(currentProduct.productSizes)
-      // if (currentProduct.productSizes[0].size) {
-      //   setCurrentSize(currentProduct.productSizes[0].size.name)
-      // }
-      // setProductSize(currentProduct.productSizes[0].id)
-      // setCurrentStockQuantity(currentProduct.productSizes[0].stockQuantity)
       setProduct({...currentProduct})
       const nextProductColors = []
       currentProduct?.productStocktaking.forEach(item => {
